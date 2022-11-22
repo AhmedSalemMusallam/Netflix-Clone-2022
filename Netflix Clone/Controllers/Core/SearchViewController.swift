@@ -7,9 +7,14 @@
 
 import UIKit
 
+
+
 class SearchViewController: UIViewController {
     
     private var titles: [Title] = [Title]()
+    
+   
+    
     
     private let discoverTable: UITableView = {
        let table = UITableView()
@@ -115,7 +120,7 @@ extension SearchViewController : UITableViewDelegate , UITableViewDataSource
     }
 }
 
-extension SearchViewController : UISearchResultsUpdating
+extension SearchViewController : UISearchResultsUpdating, SearchResultViewControllerDelegate
 {
     func updateSearchResults(for searchController: UISearchController) {
         let searchBar = searchController.searchBar
@@ -124,6 +129,8 @@ extension SearchViewController : UISearchResultsUpdating
               !query.trimmingCharacters(in: .whitespaces).isEmpty,
               query.trimmingCharacters(in: .whitespaces).count >= 3,
               let resultcontroller = searchController.searchResultsController as? SearchResultsViewController else { return }
+        
+        resultcontroller.delegate = self
         
         APICaller.shared.MovieSearch(with: query){ result in
             DispatchQueue.main.async {
@@ -136,5 +143,15 @@ extension SearchViewController : UISearchResultsUpdating
                 }
             }
         }
+    }
+    
+    func searchResultViewControllerDidTapItem(_ viewModel: TitlePreviewViewModel) {
+        
+        DispatchQueue.main.async { [weak self] in
+            let vc = TitlePreviewViewController()
+            vc.configure(with: viewModel)
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }
+        
     }
 }
